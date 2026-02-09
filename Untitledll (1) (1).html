@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canada PTO Balance Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #5DD3C8 0%, #6DD5CA 25%, #5ABDC4 50%, #7AA4E3 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            padding-bottom: 80px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+
+        .card h2 {
+            color: #2898B3;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            border-bottom: 2px solid #5DD3C8;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input[type="number"],
+        .form-group input[type="date"],
+        .form-group input[type="text"],
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E3DACF;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2898B3;
+        }
+
+        .file-upload {
+            border: 2px dashed #5DD3C8;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafa;
+        }
+
+        .file-upload:hover {
+            background: #E3DACF;
+            border-color: #2898B3;
+        }
+
+        .file-upload.has-file {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .file-upload input {
+            display: none;
+        }
+
+        .file-upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .file-upload-text {
+            color: #666;
+        }
+
+        .file-name {
+            color: #10b981;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #5DD3C8 0%, #2898B3 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 152, 179, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        /* Main Balance Card */
+        .balance-main {
+            background: linear-gradient(135deg, #5DD3C8 0%, #2898B3 50%, #7AA4E3 100%);
+            border-radius: 16px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .balance-main.negative {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+
+        .balance-main-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .balance-main-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+        }
+
+        .balance-main-unit {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        /* Balance Composition */
+        .balance-composition {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .balance-component {
+            background: rgba(255,255,255,0.15);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: left;
+        }
+
+        .balance-component-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .balance-component-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .balance-component-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .balance-component-expiry {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .expiry-warning {
+            background: rgba(251, 191, 36, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .expiry-ok {
+            background: rgba(16, 185, 129, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #f8fafa 0%, #E3DACF 100%);
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .stat-box.warning {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+        }
+
+        .stat-box.danger {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-box.danger .stat-value {
+            color: #dc2626;
+        }
+
+        .stat-box.warning .stat-value {
+            color: #d97706;
+        }
+
+        .breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+
+        .breakdown-table th,
+        .breakdown-table td {
+            padding: 10px 6px;
+            text-align: center;
+            border-bottom: 1px solid #E3DACF;
+        }
+
+        .breakdown-table th {
+            background: #E3DACF;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .breakdown-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .breakdown-table .period-cell {
+            text-align: left;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .breakdown-table .q1-row {
+            background: #fef3c7;
+        }
+
+        .breakdown-table .q234-row {
+            background: rgba(93, 211, 200, 0.15);
+        }
+
+        .breakdown-table .negative {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .breakdown-table .expired {
+            color: #f59e0b;
+            font-weight: 600;
+        }
+
+        .breakdown-table .muted {
+            color: #999;
+            font-style: italic;
+        }
+
+        .info-text {
+            background: #E3DACF;
+            border-left: 4px solid #2898B3;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .balance-composition {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-color.q1 {
+            background: #fef3c7;
+        }
+
+        .legend-color.q234 {
+            background: rgba(93, 211, 200, 0.3);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        h3 {
+            color: #333;
+            margin: 20px 0 10px;
+        }
+
+        /* Footer */
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #555;
+            border-top: 1px solid #E3DACF;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+
+        .footer a {
+            color: #2898B3;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Toggle Switch */
+        .toggle-group {
+            margin-bottom: 20px;
+        }
+
+        .toggle-group label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .toggle-options {
+            display: flex;
+            gap: 20px;
+        }
+
+        .toggle-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .toggle-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #2898B3;
+        }
+
+        .toggle-option span {
+            color: #555;
+        }
+
+        /* Year-wise Entitlement */
+        .yearly-entitlements {
+            display: none;
+            background: #f8fafa;
+            border: 2px solid #E3DACF;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .yearly-entitlements.show {
+            display: block;
+        }
+
+        .yearly-entitlements h4 {
+            color: #2898B3;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .year-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .year-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .year-input-group label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .year-input-group input {
+            padding: 10px 12px;
+            border: 2px solid #E3DACF;
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+
+        .year-input-group input:focus {
+            outline: none;
+            border-color: #2898B3;
+        }
+
+        .entitlement-note {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Canada PTO Balance Calculator</h1>
+
+        <div class="card">
+            <h2>Employee Information</h2>
+            
+            <div class="form-group">
+                <label>Upload Time Off File</label>
+                <div class="file-upload" id="fileUploadArea">
+                    <div class="file-upload-icon">📄</div>
+                    <div class="file-upload-text">Click to upload or drag & drop</div>
+                    <div class="file-name" id="fileName"></div>
+                    <input type="file" id="csvFile" accept=".csv">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="joinDate">Join Date</label>
+                    <input type="date" id="joinDate">
+                </div>
+
+                <div class="form-group">
+                    <label for="calculationDate">Calculate Balance As Of</label>
+                    <input type="date" id="calculationDate">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="region">Province/Territory</label>
+                <select id="region">
+                    <option value="">Select Province/Territory</option>
+                    <option value="Alberta">Alberta</option>
+                    <option value="British Columbia">British Columbia</option>
+                    <option value="Manitoba">Manitoba</option>
+                    <option value="New Brunswick">New Brunswick</option>
+                    <option value="Newfoundland and Labrador">Newfoundland and Labrador</option>
+                    <option value="Nova Scotia">Nova Scotia</option>
+                    <option value="Northwest Territories">Northwest Territories</option>
+                    <option value="Nunavut">Nunavut</option>
+                    <option value="Ontario">Ontario</option>
+                    <option value="Prince Edward Island">Prince Edward Island</option>
+                    <option value="Quebec">Quebec</option>
+                    <option value="Saskatchewan">Saskatchewan</option>
+                    <option value="Yukon">Yukon</option>
+                </select>
+                <p class="helper-text">Required for accurate holiday exclusion when calculating working days</p>
+            </div>
+
+            <div class="toggle-group">
+                <label>Is annual entitlement the same for each year?</label>
+                <div class="toggle-options">
+                    <label class="toggle-option">
+                        <input type="radio" name="sameEntitlement" value="yes" checked>
+                        <span>Yes</span>
+                    </label>
+                    <label class="toggle-option">
+                        <input type="radio" name="sameEntitlement" value="no">
+                        <span>No (varies by year)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group" id="singleEntitlementGroup">
+                <label for="annualEntitlement">Annual Entitlement (days)</label>
+                <input type="number" id="annualEntitlement" min="0" max="365" step="0.001" placeholder="e.g., 24">
+            </div>
+
+            <div class="yearly-entitlements" id="yearlyEntitlements">
+                <h4>Entitlement by Year</h4>
+                <div class="year-inputs" id="yearInputsContainer">
+                    <!-- Year inputs will be dynamically generated -->
+                </div>
+                <p class="entitlement-note">Enter the annual entitlement for each year. This accounts for seniority increases or client adjustments.</p>
+            </div>
+
+            <div class="form-group">
+                <label for="maxRollover">Max Rollover Allowed (days)</label>
+                <input type="number" id="maxRollover" min="0" max="365" step="0.001" placeholder="e.g., 10">
+            </div>
+
+            <button class="btn" id="calculateBtn">Calculate Balance</button>
+        </div>
+
+        <div class="results" id="results">
+            <!-- Main Balance Card with Composition -->
+            <div class="balance-main" id="balanceMainCard">
+                <div class="balance-main-label">Current Leave Balance</div>
+                <div class="balance-main-value" id="currentBalance">-</div>
+                <div class="balance-main-unit">days</div>
+                
+                <div class="balance-composition">
+                    <div class="balance-component">
+                        <div class="balance-component-header">
+                            <span class="balance-component-label">Rollover Balance</span>
+                        </div>
+                        <div class="balance-component-value" id="rolloverBalanceMain">-</div>
+                        <div class="balance-component-expiry" id="rolloverExpiryInfo">
+                            <!-- Expiry info will be inserted here -->
+                        </div>
+                    </div>
+                    <div class="balance-component">
+                        <div class="balance-component-header">
+                            <span class="balance-component-label">New Entitlement Balance</span>
+                        </div>
+                        <div class="balance-component-value" id="newEntitlementBalance">-</div>
+                        <div class="balance-component-expiry" id="newEntitlementExpiryInfo">
+                            <!-- Expiry info will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Usage & Accrual Summary</h2>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Fresh Accrued This Year</div>
+                        <div class="stat-value" id="accruedThisYear">-</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Used This Year</div>
+                        <div class="stat-value" id="usedThisYear">-</div>
+                    </div>
+                    <div class="stat-box warning" id="expiredBox">
+                        <div class="stat-label">Rollover Expired</div>
+                        <div class="stat-value" id="rolloverExpired">-</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Rollover Received</div>
+                        <div class="stat-value" id="rolloverReceived">-</div>
+                    </div>
+                    <div class="stat-box" id="negativeCarryBox">
+                        <div class="stat-label">Negative Carry Forward</div>
+                        <div class="stat-value" id="negativeCarry">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Year-by-Year Breakdown (Split by Rollover Expiry)</h2>
+                
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color q1"></div>
+                        <span>Jan 1 - Mar 31 (Rollover Valid)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color q234"></div>
+                        <span>Apr 1 - Dec 31 (Rollover Expired)</span>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="breakdown-table" id="breakdownTable">
+                        <thead>
+                            <tr>
+                                <th rowspan="2">Period</th>
+                                <th rowspan="2">Entitlement</th>
+                                <th colspan="2">Carry Forward</th>
+                                <th rowspan="2">Fresh Accrual</th>
+                                <th rowspan="2">Total Available</th>
+                                <th colspan="3">Usage</th>
+                                <th rowspan="2">Rollover Expired</th>
+                                <th rowspan="2">End Balance</th>
+                            </tr>
+                            <tr>
+                                <th>Rollover</th>
+                                <th>Negative</th>
+                                <th>Total</th>
+                                <th>From Rollover</th>
+                                <th>From New</th>
+                            </tr>
+                        </thead>
+                        <tbody id="breakdownBody">
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card" id="calculationDetails" style="display: none;">
+                    <h2>Detailed Calculation Breakdown</h2>
+                    <div id="calculationDetailsContent"></div>
+                </div>
+
+                <div class="info-text" id="infoMessage"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        For any discrepancy, please contact <a href="mailto:amyyoung@hellopebl.com">Amy Young</a>
+    </div>
+
+    <script>
+        // Global variables
+        let csvData = [];
+        let holidays2025 = new Map(); // Map of date strings (YYYY-MM-DD) to holiday names
+        let holidays2026 = new Map();
+        
+        // Set default calculation date to first of current month
+        const today = new Date();
+        const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+        document.getElementById('calculationDate').valueAsDate = firstOfMonth;
+
+        // Embedded holiday data (2025 and 2026)
+        const holidaysData2025 = [
+            {name: "New Year's Day", type: "national", province: "", date: "01-01"},
+            {name: "Good Friday", type: "national", province: "", date: "04-18"},
+            {name: "Canada Day", type: "national", province: "", date: "07-01"},
+            {name: "Labour Day", type: "national", province: "", date: "09-01"},
+            {name: "Christmas Day", type: "national", province: "", date: "12-25"},
+            {name: "Family Day", type: "regional", province: "Alberta", date: "02-17"},
+            {name: "Victoria Day", type: "regional", province: "Alberta", date: "05-19"},
+            {name: "Thanksgiving Day", type: "regional", province: "Alberta", date: "10-13"},
+            {name: "Family Day", type: "regional", province: "British Columbia", date: "02-17"},
+            {name: "Victoria Day", type: "regional", province: "British Columbia", date: "05-19"},
+            {name: "British Columbia Day", type: "regional", province: "British Columbia", date: "08-04"},
+            {name: "National Day for Truth and Reconciliation", type: "regional", province: "British Columbia", date: "09-30"},
+            {name: "Thanksgiving Day", type: "regional", province: "British Columbia", date: "10-13"},
+            {name: "Remembrance Day", type: "regional", province: "British Columbia", date: "11-11"},
+            {name: "Louis Riel Day", type: "regional", province: "Manitoba", date: "02-17"},
+            {name: "Victoria Day", type: "regional", province: "Manitoba", date: "05-19"},
+            {name: "National Day for Truth and Reconciliation", type: "regional", province: "Manitoba", date: "09-30"},
+            {name: "Thanksgiving Day", type: "regional", province: "Manitoba", date: "10-13"},
+            {name: "Remembrance Day", type: "regional", province: "Manitoba", date: "11-11"},
+            {name: "Family Day", type: "regional", province: "New Brunswick", date: "02-17"},
+            {name: "New Brunswick Day", type: "regional", province: "New Brunswick", date: "08-04"},
+            {name: "Remembrance Day", type: "regional", province: "New Brunswick", date: "11-11"},
+            {name: "Remembrance Day", type: "regional", province: "Newfoundland and Labrador", date: "11-11"},
+            {name: "Heritage Day", type: "regional", province: "Nova Scotia", date: "02-17"},
+            {name: "Remembrance Day", type: "regional", province: "Nova Scotia", date: "11-11"},
+            {name: "Family Day", type: "regional", province: "Ontario", date: "02-17"},
+            {name: "Victoria Day", type: "regional", province: "Ontario", date: "05-19"},
+            {name: "Civic/Provincial Day", type: "regional", province: "Ontario", date: "08-04"},
+            {name: "Thanksgiving Day", type: "regional", province: "Ontario", date: "10-13"},
+            {name: "Boxing Day", type: "regional", province: "Ontario", date: "12-26"},
+            {name: "Islander Day", type: "regional", province: "Prince Edward Island", date: "02-17"},
+            {name: "National Day for Truth and Reconciliation", type: "regional", province: "Prince Edward Island", date: "09-30"},
+            {name: "Remembrance Day", type: "regional", province: "Prince Edward Island", date: "11-11"},
+            {name: "St. Jean Baptiste Day", type: "regional", province: "Quebec", date: "06-24"},
+            {name: "Thanksgiving Day", type: "regional", province: "Quebec", date: "10-13"},
+            {name: "Family Day", type: "regional", province: "Saskatchewan", date: "02-17"},
+            {name: "Victoria Day", type: "regional", province: "Saskatchewan", date: "05-19"},
+            {name: "Saskatchewan Day", type: "regional", province: "Saskatchewan", date: "08-04"},
+            {name: "Thanksgiving Day", type: "regional", province: "Saskatchewan", date: "10-13"},
+            {name: "Remembrance Day", type: "regional", province: "Saskatchewan", date: "11-11"}
+        ];
+
+        const holidaysData2026 = [
+            {name: "New Year's Day", type: "national", province: "", date: "01-01"},
+            {name: "Good Friday", type: "national", province: "", date: "04-03"},
+            {name: "Canada Day", type: "national", province: "", date: "07-01"},
+            {name: "Labour Day", type: "national", province: "", date: "09-07"},
+            {name: "Christmas Day", type: "national", province: "", date: "12-25"},
+            {name: "Family Day", type: "regional", province: "Alberta", date: "02-16"},
+            {name: "Victoria Day", type: "regional", province: "Alberta", date: "05-18"},
+            {name: "Thanksgiving Day", type: "regional", province: "Alberta", date: "10-12"},
+            {name: "Remembrance Day", type: "regional", province: "Alberta", date: "11-11"},
+            {name: "Family Day", type: "regional", province: "British Columbia", date: "02-16"},
+            {name: "Victoria Day", type: "regional", province: "British Columbia", date: "05-18"},
+            {name: "British Columbia Day", type: "regional", province: "British Columbia", date: "08-03"},
+            {name: "National Day for Truth and Reconciliation", type: "regional", province: "British Columbia", date: "09-30"},
+            {name: "Thanksgiving Day", type: "regional", province: "British Columbia", date: "10-12"},
+            {name: "Remembrance Day", type: "regional", province: "British Columbia", date: "11-11"},
+            {name: "Louis Riel Day", type: "regional", province: "Manitoba", date: "02-16"},
+            {name: "Victoria Day", type: "regional", province: "Manitoba", date: "05-18"},
+            {name: "Terry Fox Day", type: "regional", province: "Manitoba", date: "08-03"},
+            {name: "National Day for Truth and Reconciliation", type: "regional", province: "Manitoba", date: "09-30"},
+            {name: "Thanksgiving Day", type: "regional", province: "Manitoba", date: "10-12"},
+            {name: "Family Day", type: "regional", province: "New Brunswick", date: "02-16"},
+            {name: "New Brunswick Day", type: "regional", province: "New Brunswick", date: "08-03"},
+            {name: "Remembrance Day", type: "regional", province: "New Brunswick", date: "11-11"},
+            {name: "Memorial Day", type: "regional", province: "Newfoundland and Labrador", date: "07-01"},
+            {name: "Remembrance Day", type: "regional", province: "Newfoundland and Labrador", date: "11-11"},
+            {name: "Nova Scotia Heritage Day", type: "regional", province: "Nova Scotia", date: "02-16"},
+            {name: "Natal Day", type: "regional", province: "Nova Scotia", date: "08-03"},
+            {name: "Remembrance Day", type: "regional", province: "Nova Scotia", date: "11-11"},
+            {name: "Victoria Day", type: "regional", province: "Northwest Territories", date: "05-18"},
+            {name: "National Indigenous Peoples Day", type: "regional", province: "Northwest Territories", date: "06-21"},
+            {name: "Civic/Provincial Day", type: "regional", province: "Northwest Territories", date: "08-03"},
+            {name: "National Day for Truth and Reconciliation", type: "regional", province: "Northwest Territories", date: "09-30"},
+            {name: "Thanksgiving Day", type: "regional", province: "Northwest Territories", date: "10-12"},
+            {name: "Remembrance Day", type: "regional", province: "Northwest Territories", date: "11-11"},
+            {name: "Victoria Day", type: "regional", province: "Nunavut", date: "05-18"},
+            {name: "Nunavut Day", type: "regional", province: "Nunavut", date: "07-09"},
+            {name: "Civic/Provincial Day", type: "regional", province: "Nunavut", date: "08-03"},
+            {name: "National Day for Truth and Reconciliation", type: "regional", province: "Nunavut", date: "09-30"},
+            {name: "Thanksgiving Day", type: "regional", province: "Nunavut", date: "10-12"},
+            {name: "Remembrance Day", type: "regional", province: "Nunavut", date: "11-11"},
+            {name: "Family Day", type: "regional", province: "Ontario", date: "02-16"},
+            {name: "Victoria Day", type: "regional", province: "Ontario", date: "05-18"},
+            {name: "Civic/Provincial Day", type: "regional", province: "Ontario", date: "08-03"},
+            {name: "Thanksgiving Day", type: "regional", province: "Ontario", date: "10-12"},
+            {name: "Boxing Day", type: "regional", province: "Ontario", date: "12-26"},
+            {name: "Islander Day", type: "regional", province: "Prince Edward Island", date: "02-16"},
+            {name: "National Day for Truth and Reconciliation", type: "regional", province: "Prince Edward Island", date: "09-30"},
+            {name: "Remembrance Day", type: "regional", province: "Prince Edward Island", date: "11-11"},
+            {name: "National Patriots' Day", type: "regional", province: "Quebec", date: "05-18"},
+            {name: "St. Jean Baptiste Day", type: "regional", province: "Quebec", date: "06-24"},
+            {name: "Thanksgiving Day", type: "regional", province: "Quebec", date: "10-12"},
+            {name: "Family Day", type: "regional", province: "Saskatchewan", date: "02-16"},
+            {name: "Victoria Day", type: "regional", province: "Saskatchewan", date: "05-18"},
+            {name: "Saskatchewan Day", type: "regional", province: "Saskatchewan", date: "08-03"},
+            {name: "Thanksgiving Day", type: "regional", province: "Saskatchewan", date: "10-12"},
+            {name: "Remembrance Day", type: "regional", province: "Saskatchewan", date: "11-11"},
+            {name: "Victoria Day", type: "regional", province: "Yukon", date: "05-18"},
+            {name: "National Indigenous Peoples Day", type: "regional", province: "Yukon", date: "06-21"},
+            {name: "Discovery Day", type: "regional", province: "Yukon", date: "08-17"},
+            {name: "National Day for Truth and Reconciliation", type: "regional", province: "Yukon", date: "09-30"},
+            {name: "Thanksgiving Day", type: "regional", province: "Yukon", date: "10-12"},
+            {name: "Remembrance Day", type: "regional", province: "Yukon", date: "11-11"}
+        ];
+
+        // Load embedded holiday data
+        function loadHolidays() {
+            // Load 2025 holidays
+            holidaysData2025.forEach(holiday => {
+                const [month, day] = holiday.date.split('-').map(Number);
+                const dateKey = `2025-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                if (!holidays2025.has(dateKey)) {
+                    holidays2025.set(dateKey, []);
+                }
+                holidays2025.get(dateKey).push({
+                    name: holiday.name,
+                    type: holiday.type,
+                    province: holiday.province
+                });
+            });
+            
+            // Load 2026 holidays
+            holidaysData2026.forEach(holiday => {
+                const [month, day] = holiday.date.split('-').map(Number);
+                const dateKey = `2026-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                if (!holidays2026.has(dateKey)) {
+                    holidays2026.set(dateKey, []);
+                }
+                holidays2026.get(dateKey).push({
+                    name: holiday.name,
+                    type: holiday.type,
+                    province: holiday.province
+                });
+            });
+        }
+
+        // Check if a date is a holiday for the given region
+        function isHoliday(date, region) {
+            if (!region) return false; // No region selected, don't exclude any holidays
+            
+            const year = date.getFullYear();
+            const dateKey = `${year}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            const holidays = year === 2025 ? holidays2025 : holidays2026;
+            
+            if (!holidays.has(dateKey)) return false;
+            
+            const dayHolidays = holidays.get(dateKey);
+            // Normalize region for comparison (trim whitespace, case-insensitive)
+            const normalizedRegion = region.trim();
+            
+            // Check if any holiday applies:
+            // 1. National holidays (apply to everyone)
+            // 2. Regional holidays ONLY if province matches exactly
+            return dayHolidays.some(h => {
+                if (h.type === 'national') {
+                    return true; // National holidays apply to everyone
+                }
+                if (h.type === 'regional') {
+                    // Regional holidays only apply if province matches exactly
+                    const normalizedProvince = h.province.trim();
+                    return normalizedProvince === normalizedRegion;
+                }
+                return false;
+            });
+        }
+
+        // Get holiday name for a date (only returns the applicable holiday)
+        function getHolidayName(date, region) {
+            if (!region) return null;
+            
+            const year = date.getFullYear();
+            const dateKey = `${year}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            const holidays = year === 2025 ? holidays2025 : holidays2026;
+            
+            if (!holidays.has(dateKey)) return null;
+            
+            const dayHolidays = holidays.get(dateKey);
+            const normalizedRegion = region.trim();
+            
+            // Prefer regional holiday for the selected province, then national
+            const regional = dayHolidays.find(h => 
+                h.type === 'regional' && h.province.trim() === normalizedRegion
+            );
+            if (regional) return regional.name;
+            
+            // If no regional match, check for national holiday
+            const national = dayHolidays.find(h => h.type === 'national');
+            return national ? national.name : null; // Don't return other provinces' regional holidays
+        }
+
+        // Load embedded holidays on page load (synchronous, no fetch needed)
+        loadHolidays();
+
+        // Toggle entitlement mode
+        const sameEntitlementRadios = document.querySelectorAll('input[name="sameEntitlement"]');
+        const singleEntitlementGroup = document.getElementById('singleEntitlementGroup');
+        const yearlyEntitlements = document.getElementById('yearlyEntitlements');
+
+        sameEntitlementRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                if (e.target.value === 'yes') {
+                    singleEntitlementGroup.style.display = 'block';
+                    yearlyEntitlements.classList.remove('show');
+                } else {
+                    singleEntitlementGroup.style.display = 'none';
+                    yearlyEntitlements.classList.add('show');
+                    generateYearInputs();
+                }
+            });
+        });
+
+        // Generate year inputs when dates change
+        document.getElementById('joinDate').addEventListener('change', generateYearInputs);
+        document.getElementById('calculationDate').addEventListener('change', generateYearInputs);
+
+        function generateYearInputs() {
+            const joinDateVal = document.getElementById('joinDate').value;
+            const calcDateVal = document.getElementById('calculationDate').value;
+            
+            if (!joinDateVal || !calcDateVal) return;
+            
+            const joinYear = new Date(joinDateVal).getFullYear();
+            const calcYear = new Date(calcDateVal).getFullYear();
+            
+            const container = document.getElementById('yearInputsContainer');
+            container.innerHTML = '';
+            
+            for (let year = joinYear; year <= calcYear; year++) {
+                const div = document.createElement('div');
+                div.className = 'year-input-group';
+                div.innerHTML = `
+                    <label for="entitlement_${year}">${year} Entitlement (days)</label>
+                    <input type="number" id="entitlement_${year}" min="0" max="365" step="0.001" placeholder="e.g., 24">
+                `;
+                container.appendChild(div);
+            }
+        }
+
+        // File upload handling
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const csvFileInput = document.getElementById('csvFile');
+        const fileNameDisplay = document.getElementById('fileName');
+
+        fileUploadArea.addEventListener('click', () => csvFileInput.click());
+        
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.style.borderColor = '#2898B3';
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.style.borderColor = '#5DD3C8';
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) {
+                handleFile(file);
+            }
+        });
+
+        csvFileInput.addEventListener('change', (e) => {
+            if (e.target.files[0]) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            fileNameDisplay.textContent = file.name;
+            fileUploadArea.classList.add('has-file');
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                csvData = parseCSV(e.target.result);
+                console.log('Parsed CSV data:', csvData);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                if (values.length >= headers.length) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index]?.trim() || '';
+                    });
+                    data.push(row);
+                }
+            }
+            return data;
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current);
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current);
+            return result;
+        }
+
+        // Format number to 3 decimals
+        function fmt(num) {
+            return num.toFixed(3);
+        }
+
+        // Format date for display
+        function formatDate(date) {
+            return date.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        // Parse date string as LOCAL date (fixes timezone issues with CSV dates)
+        // Input: "2025-12-31" -> Output: Dec 31, 2025 00:00:00 LOCAL time
+        function parseDateLocal(dateStr) {
+            if (!dateStr) return null;
+            const parts = dateStr.trim().split('-');
+            if (parts.length === 3) {
+                return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            }
+            // Fallback for other formats
+            const d = new Date(dateStr);
+            return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        }
+
+        // Calculate button handler
+        document.getElementById('calculateBtn').addEventListener('click', calculate);
+
+        function calculate() {
+            // Holidays are already loaded from embedded data (synchronous)
+            // Verify holidays loaded (check for New Year's Day as test)
+            const testDate = new Date(2026, 0, 1); // Jan 1, 2026
+            const testHoliday = isHoliday(testDate, document.getElementById('region').value);
+            if (!testHoliday && holidays2026.size > 0) {
+                console.warn('Holiday check may have an issue. New Year\'s Day should be a holiday.');
+            }
+            const joinDate = new Date(document.getElementById('joinDate').value);
+            const maxRollover = parseFloat(document.getElementById('maxRollover').value);
+            const calculationDate = new Date(document.getElementById('calculationDate').value);
+            const sameEntitlement = document.querySelector('input[name="sameEntitlement"]:checked').value === 'yes';
+
+            // Validation
+            if (isNaN(joinDate.getTime())) {
+                alert('Please enter a valid Join Date');
+                return;
+            }
+            const region = document.getElementById('region').value;
+            if (!region) {
+                alert('Please select a Province/Territory for accurate holiday exclusion');
+                return;
+            }
+            if (isNaN(maxRollover) || maxRollover < 0) {
+                alert('Please enter a valid Max Rollover');
+                return;
+            }
+
+            // Get entitlements
+            const joinYear = joinDate.getFullYear();
+            const currentYear = calculationDate.getFullYear();
+            const entitlementsByYear = {};
+
+            if (sameEntitlement) {
+                const annualEntitlement = parseFloat(document.getElementById('annualEntitlement').value);
+                if (isNaN(annualEntitlement) || annualEntitlement < 0) {
+                    alert('Please enter a valid Annual Entitlement');
+                    return;
+                }
+                for (let year = joinYear; year <= currentYear; year++) {
+                    entitlementsByYear[year] = annualEntitlement;
+                }
+            } else {
+                for (let year = joinYear; year <= currentYear; year++) {
+                    const input = document.getElementById(`entitlement_${year}`);
+                    if (!input) {
+                        alert(`Please enter entitlement for ${year}`);
+                        return;
+                    }
+                    const value = parseFloat(input.value);
+                    if (isNaN(value) || value < 0) {
+                        alert(`Please enter a valid entitlement for ${year}`);
+                        return;
+                    }
+                    entitlementsByYear[year] = value;
+                }
+            }
+
+            // Filter leaves (completed only)
+            const employeeLeaves = csvData.filter(row => 
+                row['Status']?.toLowerCase() === 'completed'
+            );
+
+            // Track detailed calculation for display (reset for each calculation)
+            const calculationDetails = [];
+            
+            // Helper to get leaves in a date range - properly splits leaves across period boundaries
+            // Assigns full days from start, fractional day (if any) at the end
+            function getLeavesInRange(periodStart, periodEnd, periodName) {
+                let total = 0;
+                employeeLeaves.forEach(leave => {
+                    // Parse dates as LOCAL to avoid timezone issues
+                    const leaveStart = parseDateLocal(leave['Start Date']);
+                    const leaveEnd = parseDateLocal(leave['End Date']);
+                    const totalDays = parseFloat(leave['Total Days']) || 0;
+                    
+                    // Skip if dates couldn't be parsed
+                    if (!leaveStart || !leaveEnd) return;
+                    
+                    // Normalize dates to date-only (no time) for accurate comparison
+                    const leaveStartDate = new Date(leaveStart.getFullYear(), leaveStart.getMonth(), leaveStart.getDate());
+                    const leaveEndDate = new Date(leaveEnd.getFullYear(), leaveEnd.getMonth(), leaveEnd.getDate());
+                    const periodStartDate = new Date(periodStart.getFullYear(), periodStart.getMonth(), periodStart.getDate());
+                    const periodEndDate = new Date(periodEnd.getFullYear(), periodEnd.getMonth(), periodEnd.getDate());
+                    
+                    // Skip if no overlap with this period
+                    if (leaveEndDate < periodStartDate || leaveStartDate > periodEndDate) {
+                        return;
+                    }
+                    
+                    // Check if leave is entirely within this period
+                    if (leaveStartDate >= periodStartDate && leaveEndDate <= periodEndDate) {
+                        total += totalDays;
+                        calculationDetails.push({
+                            leave: `${leave['Start Date']} to ${leave['End Date']}`,
+                            totalDays: totalDays,
+                            period: periodName,
+                            daysCounted: totalDays,
+                            method: 'Entirely within period',
+                            excludedHolidays: []
+                        });
+                        return;
+                    }
+                    
+                    // Leave spans period boundary - count ACTUAL working days in each period
+                    // Total Days = actual working days taken (excluding weekends/holidays)
+                    // We need to count how many of those working days fall in THIS period
+                    // Overlap should be: max(leaveStart, periodStart) to min(leaveEnd, periodEnd)
+                    const overlapStartRaw = leaveStartDate > periodStartDate ? leaveStartDate : periodStartDate;
+                    const overlapEndRaw = leaveEndDate < periodEndDate ? leaveEndDate : periodEndDate;
+                    
+                    // Ensure overlap is valid (start <= end)
+                    if (overlapStartRaw > overlapEndRaw) {
+                        return; // No overlap
+                    }
+                    
+                    // Normalize overlap dates to date-only (no time component)
+                    const overlapStart = new Date(overlapStartRaw.getFullYear(), overlapStartRaw.getMonth(), overlapStartRaw.getDate());
+                    const overlapEnd = new Date(overlapEndRaw.getFullYear(), overlapEndRaw.getMonth(), overlapEndRaw.getDate());
+                    
+                    // Count actual working days (excluding weekends AND holidays) in this period's overlap
+                    // This gives us the EXACT number of days from the leave that fall in this period
+                    let workingDaysInPeriod = 0;
+                    const excludedHolidays = [];
+                    const countedDates = [];
+                    const excludedWeekends = [];
+                    
+                    // Use date-only comparison to avoid timezone issues
+                    // Extract date components directly from normalized overlap dates
+                    const startYear = overlapStart.getFullYear();
+                    const startMonth = overlapStart.getMonth();
+                    const startDay = overlapStart.getDate();
+                    
+                    const endYear = overlapEnd.getFullYear();
+                    const endMonth = overlapEnd.getMonth();
+                    const endDay = overlapEnd.getDate();
+                    
+                    // Iterate day by day, ensuring we only count dates within the overlap
+                    for (let year = startYear; year <= endYear; year++) {
+                        const monthStart = (year === startYear) ? startMonth : 0;
+                        const monthEnd = (year === endYear) ? endMonth : 11;
+                        
+                        for (let month = monthStart; month <= monthEnd; month++) {
+                            const dayStart = (year === startYear && month === startMonth) ? startDay : 1;
+                            const dayEnd = (year === endYear && month === endMonth) ? endDay : new Date(year, month + 1, 0).getDate();
+                            
+                            for (let day = dayStart; day <= dayEnd; day++) {
+                                const currentDate = new Date(year, month, day);
+                                const dayOfWeek = currentDate.getDay();
+                                
+                                // Create date string using the exact date components
+                                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                                
+                                // Double-check this date is within the overlap (safety check)
+                                if (currentDate < overlapStart || currentDate > overlapEnd) {
+                                    continue;
+                                }
+                                
+                                // Exclude weekends (Saturday = 6, Sunday = 0)
+                                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                                    excludedWeekends.push(dateStr);
+                                } else {
+                                    // Check for holidays - MUST exclude holidays
+                                    // Create a proper Date object for holiday checking (ensure it's in local time)
+                                    const checkDate = new Date(year, month, day);
+                                    const isHolidayDate = isHoliday(checkDate, region);
+                                    
+                                    if (isHolidayDate) {
+                                        const holidayName = getHolidayName(checkDate, region);
+                                        excludedHolidays.push({date: dateStr, name: holidayName || 'Holiday'});
+                                    } else {
+                                        workingDaysInPeriod++;
+                                        countedDates.push(dateStr);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Add the exact count of working days in this period
+                    // No pro-rating needed - we're counting actual days
+                    total += workingDaysInPeriod;
+                    
+                    calculationDetails.push({
+                        leave: `${leave['Start Date']} to ${leave['End Date']} (${totalDays} days total)`,
+                        totalDays: totalDays,
+                        period: periodName,
+                        daysCounted: workingDaysInPeriod,
+                        method: 'Split across period boundary',
+                        overlapRange: `${startYear}-${String(startMonth + 1).padStart(2, '0')}-${String(startDay).padStart(2, '0')} to ${endYear}-${String(endMonth + 1).padStart(2, '0')}-${String(endDay).padStart(2, '0')}`,
+                        countedDates: countedDates,
+                        excludedHolidays: excludedHolidays,
+                        excludedWeekends: excludedWeekends.length
+                    });
+                });
+                return total;
+            }
+
+            // Calculate year by year with split periods
+            const breakdown = [];
+            
+            // Track carryovers separately
+            let positiveRollover = 0;
+            let negativeCarry = 0;
+
+            for (let year = joinYear; year <= currentYear; year++) {
+                const isJoinYear = (year === joinYear);
+                const isCurrentYear = (year === currentYear);
+                const currentMonth = calculationDate.getMonth() + 1;
+                
+                // Get this year's entitlement and monthly accrual
+                const yearEntitlement = entitlementsByYear[year];
+                const monthlyAccrual = yearEntitlement / 12;
+
+                // Define the two periods
+                const jan1 = new Date(year, 0, 1);
+                const mar31 = new Date(year, 2, 31);
+                const apr1 = new Date(year, 3, 1);
+                const dec31 = new Date(year, 11, 31);
+
+                // ========== PERIOD 1: Jan 1 - Mar 31 ==========
+                let p1Start = jan1;
+                let p1End = mar31;
+                let p1Exists = true;
+
+                if (isJoinYear && joinDate > mar31) {
+                    p1Exists = false;
+                } else if (isJoinYear && joinDate > jan1) {
+                    p1Start = joinDate;
+                }
+
+                if (isCurrentYear && calculationDate < jan1) {
+                    p1Exists = false;
+                } else if (isCurrentYear && calculationDate < mar31) {
+                    p1End = calculationDate;
+                }
+
+                if (p1Exists && p1Start <= p1End) {
+                    let p1FreshAccrual = 0;
+                    if (isJoinYear && joinDate >= jan1 && joinDate <= mar31) {
+                        const joinMonth = joinDate.getMonth();
+                        const joinDay = joinDate.getDate();
+                        const daysInJoinMonth = new Date(year, joinMonth + 1, 0).getDate();
+                        const fullMonthsInP1 = Math.max(0, 2 - joinMonth);
+                        const partialMonth = (daysInJoinMonth - joinDay + 1) / daysInJoinMonth;
+                        p1FreshAccrual = monthlyAccrual * (fullMonthsInP1 + partialMonth);
+                    } else {
+                        if (isCurrentYear) {
+                            const monthsInP1 = Math.min(currentMonth, 3);
+                            p1FreshAccrual = monthlyAccrual * monthsInP1;
+                        } else {
+                            p1FreshAccrual = monthlyAccrual * 3;
+                        }
+                    }
+
+                    const p1RolloverIn = positiveRollover;
+                    const p1NegativeIn = negativeCarry;
+                    const p1TotalAvailable = p1FreshAccrual + p1RolloverIn + p1NegativeIn;
+                    
+                    const p1Used = getLeavesInRange(p1Start, p1End, `${year} Jan 1 - Mar 31`);
+                    
+                    const p1FromRollover = Math.min(Math.max(p1RolloverIn, 0), p1Used);
+                    const p1FromNew = Math.max(0, p1Used - p1FromRollover);
+                    
+                    const p1RolloverRemaining = p1RolloverIn - p1FromRollover;
+                    const p1NewRemaining = p1FreshAccrual + p1NegativeIn - p1FromNew;
+                    
+                    let p1Expired = 0;
+                    if (!isCurrentYear || (isCurrentYear && calculationDate > mar31)) {
+                        p1Expired = Math.max(p1RolloverRemaining, 0);
+                    }
+                    
+                    const p1Balance = p1TotalAvailable - p1Used - p1Expired;
+
+                    breakdown.push({
+                        period: `${year} Jan 1 - Mar 31`,
+                        periodType: 'q1',
+                        year: year,
+                        yearEntitlement: yearEntitlement,
+                        rolloverIn: p1RolloverIn,
+                        negativeIn: p1NegativeIn,
+                        freshAccrual: p1FreshAccrual,
+                        totalAvailable: p1TotalAvailable,
+                        used: p1Used,
+                        fromRollover: p1FromRollover,
+                        fromNew: p1FromNew,
+                        expired: p1Expired,
+                        balance: p1Balance,
+                        rolloverRemaining: Math.max(p1RolloverRemaining - p1Expired, 0),
+                        newRemaining: p1NewRemaining
+                    });
+
+                    positiveRollover = 0;
+                    negativeCarry = p1Balance < 0 ? p1Balance : 0;
+                    
+                    let p1PositiveNewBalance = Math.max(p1NewRemaining, 0);
+                    
+                    // ========== PERIOD 2: Apr 1 - Dec 31 ==========
+                    let p2Start = apr1;
+                    let p2End = dec31;
+                    let p2Exists = true;
+
+                    if (isCurrentYear && calculationDate < apr1) {
+                        p2Exists = false;
+                    } else if (isCurrentYear && calculationDate <= dec31) {
+                        p2End = calculationDate;
+                    }
+
+                    if (p2Exists && p2Start <= p2End) {
+                        let p2FreshAccrual = 0;
+                        if (isCurrentYear) {
+                            const monthsInP2 = Math.max(0, currentMonth - 3);
+                            p2FreshAccrual = monthlyAccrual * monthsInP2;
+                        } else {
+                            p2FreshAccrual = monthlyAccrual * 9;
+                        }
+
+                        const p2CarryFromP1 = p1PositiveNewBalance;
+                        const p2NegativeIn = negativeCarry;
+                        const p2TotalAvailable = p2FreshAccrual + p2CarryFromP1 + p2NegativeIn;
+                        
+                        const p2Used = getLeavesInRange(p2Start, p2End, `${year} Apr 1 - Dec 31`);
+                        const p2Balance = p2TotalAvailable - p2Used;
+
+                        breakdown.push({
+                            period: `${year} Apr 1 - Dec 31`,
+                            periodType: 'q234',
+                            year: year,
+                            yearEntitlement: yearEntitlement,
+                            rolloverIn: 0,
+                            negativeIn: p2NegativeIn,
+                            carryFromP1: p2CarryFromP1,
+                            freshAccrual: p2FreshAccrual,
+                            totalAvailable: p2TotalAvailable,
+                            used: p2Used,
+                            fromRollover: 0,
+                            fromNew: p2Used,
+                            expired: 0,
+                            balance: p2Balance,
+                            rolloverRemaining: 0,
+                            newRemaining: p2Balance
+                        });
+
+                        if (!isCurrentYear) {
+                            if (p2Balance >= 0) {
+                                positiveRollover = Math.min(p2Balance, maxRollover);
+                                negativeCarry = 0;
+                            } else {
+                                positiveRollover = 0;
+                                negativeCarry = p2Balance;
+                            }
+                        }
+                    }
+                } else {
+                    // P1 doesn't exist (joined after Mar 31)
+                    let p2Start = apr1;
+                    let p2End = dec31;
+                    let p2Exists = true;
+
+                    if (isJoinYear && joinDate > dec31) {
+                        p2Exists = false;
+                    } else if (isJoinYear && joinDate > apr1) {
+                        p2Start = joinDate;
+                    }
+
+                    if (isCurrentYear && calculationDate < apr1) {
+                        p2Exists = false;
+                    } else if (isCurrentYear && calculationDate <= dec31) {
+                        p2End = calculationDate;
+                    }
+
+                    if (p2Exists && p2Start <= p2End) {
+                        let p2FreshAccrual = 0;
+                        if (isJoinYear && joinDate >= apr1) {
+                            const joinMonth = joinDate.getMonth();
+                            const joinDay = joinDate.getDate();
+                            const daysInJoinMonth = new Date(year, joinMonth + 1, 0).getDate();
+                            let endMonth = isCurrentYear ? Math.min(currentMonth - 1, 11) : 11;
+                            const fullMonthsInP2 = Math.max(0, endMonth - joinMonth);
+                            const partialMonth = (daysInJoinMonth - joinDay + 1) / daysInJoinMonth;
+                            p2FreshAccrual = monthlyAccrual * (fullMonthsInP2 + partialMonth);
+                        } else {
+                            if (isCurrentYear) {
+                                const monthsInP2 = Math.max(0, currentMonth - 3);
+                                p2FreshAccrual = monthlyAccrual * monthsInP2;
+                            } else {
+                                p2FreshAccrual = monthlyAccrual * 9;
+                            }
+                        }
+
+                        const p2RolloverIn = positiveRollover;
+                        const p2NegativeIn = negativeCarry;
+                        const p2TotalAvailable = p2FreshAccrual + p2RolloverIn + p2NegativeIn;
+                        
+                        const p2Used = getLeavesInRange(p2Start, p2End, `${year} Apr 1 - Dec 31`);
+                        
+                        const p2FromRollover = Math.min(Math.max(p2RolloverIn, 0), p2Used);
+                        const p2FromNew = Math.max(0, p2Used - p2FromRollover);
+                        
+                        const p2Balance = p2TotalAvailable - p2Used;
+
+                        breakdown.push({
+                            period: `${year} Apr 1 - Dec 31`,
+                            periodType: 'q234',
+                            year: year,
+                            yearEntitlement: yearEntitlement,
+                            rolloverIn: p2RolloverIn,
+                            negativeIn: p2NegativeIn,
+                            freshAccrual: p2FreshAccrual,
+                            totalAvailable: p2TotalAvailable,
+                            used: p2Used,
+                            fromRollover: p2FromRollover,
+                            fromNew: p2FromNew,
+                            expired: 0,
+                            balance: p2Balance,
+                            rolloverRemaining: 0,
+                            newRemaining: p2Balance
+                        });
+
+                        if (!isCurrentYear) {
+                            if (p2Balance >= 0) {
+                                positiveRollover = Math.min(p2Balance, maxRollover);
+                                negativeCarry = 0;
+                            } else {
+                                positiveRollover = 0;
+                                negativeCarry = p2Balance;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Get current period data for summary
+            const lastPeriod = breakdown[breakdown.length - 1];
+            let currentBalance = lastPeriod ? lastPeriod.balance : 0;
+            
+            // Calculate summary values for current year
+            let totalUsedThisYear = 0;
+            let totalExpiredThisYear = 0;
+            let rolloverInThisYear = 0;
+            let freshAccruedThisYear = 0;
+            let negativeCarryInThisYear = 0;
+            let rolloverRemaining = 0;
+            let newEntitlementRemaining = 0;
+
+            breakdown.forEach(row => {
+                if (row.year === currentYear) {
+                    totalUsedThisYear += row.used;
+                    totalExpiredThisYear += row.expired;
+                    freshAccruedThisYear += row.freshAccrual;
+                    if (row.periodType === 'q1') {
+                        rolloverInThisYear = row.rolloverIn;
+                        negativeCarryInThisYear = row.negativeIn;
+                        rolloverRemaining = row.rolloverRemaining;
+                    }
+                }
+            });
+
+            if (lastPeriod) {
+                if (lastPeriod.periodType === 'q1') {
+                    rolloverRemaining = lastPeriod.rolloverRemaining;
+                    newEntitlementRemaining = lastPeriod.newRemaining;
+                } else {
+                    rolloverRemaining = 0;
+                    newEntitlementRemaining = lastPeriod.newRemaining;
+                }
+            }
+
+            const rolloverExpiryDate = new Date(currentYear, 2, 31);
+            const newEntitlementExpiryDate = new Date(currentYear, 11, 31);
+            const isRolloverExpired = calculationDate > rolloverExpiryDate;
+            const currentMonth = calculationDate.getMonth() + 1;
+
+            // Update UI
+            document.getElementById('results').classList.add('show');
+            document.getElementById('currentBalance').textContent = fmt(currentBalance);
+            
+            document.getElementById('rolloverBalanceMain').textContent = fmt(rolloverRemaining);
+            document.getElementById('newEntitlementBalance').textContent = fmt(newEntitlementRemaining);
+
+            let rolloverExpiryHTML = '';
+            if (rolloverRemaining > 0) {
+                rolloverExpiryHTML = `<span class="expiry-warning">Expires: ${formatDate(rolloverExpiryDate)}</span>`;
+            } else if (isRolloverExpired && totalExpiredThisYear > 0) {
+                rolloverExpiryHTML = `<span>Expired on ${formatDate(rolloverExpiryDate)}</span>`;
+            } else if (rolloverInThisYear === 0) {
+                rolloverExpiryHTML = `<span>No rollover this year</span>`;
+            } else {
+                rolloverExpiryHTML = `<span class="expiry-ok">Fully used before expiry</span>`;
+            }
+            document.getElementById('rolloverExpiryInfo').innerHTML = rolloverExpiryHTML;
+
+            let newExpiryHTML = '';
+            if (newEntitlementRemaining > 0) {
+                newExpiryHTML = `<span class="expiry-ok">Rolls over Dec 31 (max ${fmt(maxRollover)} days)</span>`;
+            } else if (newEntitlementRemaining < 0) {
+                newExpiryHTML = `<span class="expiry-warning">Negative (carries forward, no expiry)</span>`;
+            } else {
+                newExpiryHTML = `<span>Fully used</span>`;
+            }
+            document.getElementById('newEntitlementExpiryInfo').innerHTML = newExpiryHTML;
+
+            const balanceMainCard = document.getElementById('balanceMainCard');
+            if (currentBalance < 0) {
+                balanceMainCard.classList.add('negative');
+            } else {
+                balanceMainCard.classList.remove('negative');
+            }
+
+            document.getElementById('accruedThisYear').textContent = fmt(freshAccruedThisYear);
+            document.getElementById('usedThisYear').textContent = fmt(totalUsedThisYear);
+            document.getElementById('rolloverExpired').textContent = fmt(totalExpiredThisYear);
+            document.getElementById('rolloverReceived').textContent = fmt(rolloverInThisYear);
+            document.getElementById('negativeCarry').textContent = fmt(negativeCarryInThisYear);
+
+            const expiredBox = document.getElementById('expiredBox');
+            if (totalExpiredThisYear > 0) {
+                expiredBox.classList.add('danger');
+                expiredBox.classList.remove('warning');
+            } else {
+                expiredBox.classList.remove('danger');
+            }
+
+            const negativeCarryBox = document.getElementById('negativeCarryBox');
+            if (negativeCarryInThisYear < 0) {
+                negativeCarryBox.classList.add('danger');
+            } else {
+                negativeCarryBox.classList.remove('danger');
+            }
+
+            const breakdownBody = document.getElementById('breakdownBody');
+            breakdownBody.innerHTML = '';
+            
+            breakdown.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = row.periodType === 'q1' ? 'q1-row' : 'q234-row';
+                
+                const balanceClass = row.balance < 0 ? 'negative' : '';
+                const expiredClass = row.expired > 0 ? 'expired' : '';
+                const negativeClass = row.negativeIn < 0 ? 'negative' : 'muted';
+                
+                let freshAccrualDisplay = fmt(row.freshAccrual);
+                if (row.periodType === 'q234' && row.carryFromP1 !== undefined && row.carryFromP1 > 0) {
+                    freshAccrualDisplay = `${fmt(row.freshAccrual)} + ${fmt(row.carryFromP1)} (from Q1)`;
+                }
+                
+                tr.innerHTML = `
+                    <td class="period-cell"><strong>${row.period}</strong></td>
+                    <td>${fmt(row.yearEntitlement)}/yr</td>
+                    <td>${fmt(row.rolloverIn)}</td>
+                    <td class="${negativeClass}">${fmt(row.negativeIn)}</td>
+                    <td>${freshAccrualDisplay}</td>
+                    <td>${fmt(row.totalAvailable)}</td>
+                    <td>${fmt(row.used)}</td>
+                    <td>${fmt(row.fromRollover)}</td>
+                    <td>${fmt(row.fromNew)}</td>
+                    <td class="${expiredClass}">${fmt(row.expired)}</td>
+                    <td class="${balanceClass}"><strong>${fmt(row.balance)}</strong></td>
+                `;
+                breakdownBody.appendChild(tr);
+            });
+
+            // Build entitlement summary for info message
+            let entitlementSummary = '';
+            if (!sameEntitlement) {
+                entitlementSummary = '<br><strong>Entitlement by Year:</strong><br>';
+                for (let year = joinYear; year <= currentYear; year++) {
+                    entitlementSummary += `• ${year}: ${fmt(entitlementsByYear[year])} days/year (${fmt(entitlementsByYear[year]/12)} days/month)<br>`;
+                }
+            } else {
+                const singleEntitlement = entitlementsByYear[currentYear];
+                entitlementSummary = `Monthly accrual rate: ${fmt(singleEntitlement/12)} days/month<br>`;
+            }
+
+            let infoMsg = `<strong>Calculation as of ${calculationDate.toLocaleDateString()}</strong><br>`;
+            infoMsg += entitlementSummary;
+            infoMsg += `Max rollover allowed: ${fmt(maxRollover)} days<br><br>`;
+            infoMsg += `<strong>Balance Composition:</strong><br>`;
+            infoMsg += `• Rollover: ${fmt(rolloverRemaining)} days`;
+            if (rolloverRemaining > 0) {
+                infoMsg += ` (expires ${formatDate(rolloverExpiryDate)})`;
+            }
+            infoMsg += `<br>`;
+            infoMsg += `• New Entitlement: ${fmt(newEntitlementRemaining)} days`;
+            if (newEntitlementRemaining > 0) {
+                infoMsg += ` (up to ${fmt(maxRollover)} rolls over after ${formatDate(newEntitlementExpiryDate)})`;
+            } else if (newEntitlementRemaining < 0) {
+                infoMsg += ` (negative balance carries forward - no expiry)`;
+            }
+            infoMsg += `<br>`;
+            
+            if (totalExpiredThisYear > 0) {
+                infoMsg += `<br>${fmt(totalExpiredThisYear)} rollover days expired on March 31`;
+            }
+            if (currentBalance < 0) {
+                infoMsg += `<br>Balance is negative - will carry forward to next period (no expiry)`;
+            }
+            document.getElementById('infoMessage').innerHTML = infoMsg;
+            
+            // Display detailed calculation breakdown
+            const detailsDiv = document.getElementById('calculationDetails');
+            const detailsContent = document.getElementById('calculationDetailsContent');
+            
+            if (calculationDetails.length > 0) {
+                detailsDiv.style.display = 'block';
+                let detailsHTML = '<div style="font-size: 0.9rem;">';
+                
+                calculationDetails.forEach((detail, index) => {
+                    detailsHTML += `<div style="margin-bottom: 20px; padding: 15px; background: #f8fafa; border-radius: 8px; border-left: 4px solid #2898B3;">`;
+                    detailsHTML += `<strong style="color: #2898B3;">Leave ${index + 1}:</strong> ${detail.leave}<br>`;
+                    detailsHTML += `<strong>Period:</strong> ${detail.period}<br>`;
+                    detailsHTML += `<strong>Days Counted:</strong> ${detail.daysCounted.toFixed(3)} days<br>`;
+                    detailsHTML += `<strong>Method:</strong> ${detail.method}<br>`;
+                    
+                    if (detail.overlapRange) {
+                        detailsHTML += `<strong>Overlap Range:</strong> ${detail.overlapRange}<br>`;
+                    }
+                    
+                    if (detail.countedDates && detail.countedDates.length > 0) {
+                        detailsHTML += `<strong>Counted Dates (${detail.countedDates.length}):</strong> ${detail.countedDates.slice(0, 10).join(', ')}`;
+                        if (detail.countedDates.length > 10) {
+                            detailsHTML += ` ... and ${detail.countedDates.length - 10} more`;
+                        }
+                        detailsHTML += `<br>`;
+                    }
+                    
+                    if (detail.excludedHolidays && detail.excludedHolidays.length > 0) {
+                        detailsHTML += `<strong style="color: #d97706;">Excluded Holidays (${detail.excludedHolidays.length}):</strong> `;
+                        detailsHTML += detail.excludedHolidays.map(h => `${h.date} (${h.name})`).join(', ');
+                        detailsHTML += `<br>`;
+                    }
+                    
+                    if (detail.excludedWeekends > 0) {
+                        detailsHTML += `<strong>Excluded Weekends:</strong> ${detail.excludedWeekends} days<br>`;
+                    }
+                    
+                    detailsHTML += `</div>`;
+                });
+                
+                detailsHTML += '</div>';
+                detailsContent.innerHTML = detailsHTML;
+            } else {
+                detailsDiv.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
